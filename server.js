@@ -13,7 +13,6 @@ const pool = new Pool({
 })
 
 
-
 // usage
 app.use(express.json());
 app.use(cors());
@@ -90,9 +89,9 @@ app.post('/api/moviesdb', (req,res) => {
 app.put('/api/moviesdb/:id', (req, res) => {
 	const { id } = req.params;
 	const { title, director, year, rating, poster, description } = req.body;
-	const query = 'UPDATE movies SET title =$1, director=$2, year=$3, rating=$4, poster=$5 description=$6 WHERE id=$6 RETURNING *';
+	const query = 'UPDATE movies SET title =$1, director=$2, year=$3, rating=$4, poster=$5, description=$6 WHERE id=$7 RETURNING *';
 	pool
-		.query(query, [id, title, director, year, rating, poster, description])
+		.query(query, [title, director, year, rating, poster, description, id])
 		.then(data => res.status(202).json(data.rows[0]))
 		.catch(e => res.status(500).json({message:e.message}));
 })
@@ -102,7 +101,14 @@ app.delete('/api/moviesdb/:id', (req, res) => {
 	const query = 'DELETE FROM movies WHERE id=$1 RETURNING *;'
 	pool
 		.query(query, [id])
-		.then( data => res.status(500).json(data.rows[0]))
+		.then( data => {
+			if (data.rows.length === 0) {
+				res.status(404).json({ message: 'Movie not found' });
+			}else{
+
+				res.status(204).json(data.rows[0])
+			}}
+		)
 		.catch(e => res.status(500).json({message: e.message}));
 })
 
