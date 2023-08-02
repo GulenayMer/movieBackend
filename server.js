@@ -41,6 +41,33 @@ app.get('/api/movies', async (req, res) => {
 }
 });
 
+/* This is for Genres */
+const categoriesUrl = "https://api.themoviedb.org/3/genre/movie/list";
+const genreUrl = "https://api.themoviedb.org/3/discover/movie";
+/* Categories */
+app.get('/api/genres', async (req, res) => {
+	try{
+		const response = await axios.get(`${categoriesUrl}?api_key=${API_KEY}`)
+		const genres = response.data.genres;
+		res.json(genres);
+	}catch( error){
+		console.error("Error fetching data: ", error);
+		res.status(500).json({error: 'Failed to fetch movie genres'})
+	}
+});
+
+
+app.get('/api/genres/:genreId', async(req, res) => {
+	const { genreId } = req.params;
+	try{
+		const response = await axios.get(`${genreUrl}?api_key=${API_KEY}&with_genres=${genreId}`)
+		const movies = response.data.results;
+		res.json(movies);
+	}catch( error){
+		console.error('Error fetching movies:', error.message);
+		res.status(500).json({ error: 'Failed to fetch movies' });
+	}
+});
 
 
 
